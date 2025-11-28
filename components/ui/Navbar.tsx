@@ -3,13 +3,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
     const { user, signOut } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
+
+    // Close mobile menu when route changes
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [pathname]);
 
     const isActive = (path: string) => pathname === path;
 
@@ -142,21 +147,37 @@ export default function Navbar() {
                 {mobileMenuOpen && (
                     <div className="md:hidden py-4 border-t border-gray-100 animate-slide-down bg-white absolute left-0 right-0 px-4 shadow-lg">
                         <div className="flex flex-col gap-2">
-                            <Link href="/" className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50">
+                            <Link
+                                href="/"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50"
+                            >
                                 Home
                             </Link>
                             {/* Hide Services link for admin users */}
                             {user?.role !== 'admin' && (
-                                <Link href="/services" className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50">
+                                <Link
+                                    href="/services"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50"
+                                >
                                     Services
                                 </Link>
                             )}
-                            <Link href="/about" className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50">
+                            <Link
+                                href="/about"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50"
+                            >
                                 About
                             </Link>
                             {/* Hide FAQ link for admin users - they manage FAQs from dashboard */}
                             {user?.role !== 'admin' && (
-                                <Link href="/faq" className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50">
+                                <Link
+                                    href="/faq"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="text-gray-600 hover:text-primary-950 font-medium px-4 py-3 rounded-lg hover:bg-gray-50"
+                                >
                                     FAQ
                                 </Link>
                             )}
@@ -187,17 +208,28 @@ export default function Navbar() {
                                     </div>
 
                                     {user.role === 'admin' ? (
-                                        <Link href="/admin" className="text-gold-700 font-medium px-4 py-3 rounded-lg bg-gold-50 mb-2">
+                                        <Link
+                                            href="/admin"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="text-gold-700 font-medium px-4 py-3 rounded-lg bg-gold-50 mb-2"
+                                        >
                                             Admin Dashboard
                                         </Link>
                                     ) : (
-                                        <Link href="/dashboard" className="text-primary-700 font-medium px-4 py-3 rounded-lg bg-primary-50 mb-2">
+                                        <Link
+                                            href="/dashboard"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="text-primary-700 font-medium px-4 py-3 rounded-lg bg-primary-50 mb-2"
+                                        >
                                             My Dashboard
                                         </Link>
                                     )}
 
                                     <button
-                                        onClick={signOut}
+                                        onClick={() => {
+                                            signOut();
+                                            setMobileMenuOpen(false);
+                                        }}
                                         className="text-red-600 hover:text-red-700 font-medium w-full text-left px-4 py-3 rounded-lg hover:bg-red-50"
                                     >
                                         Sign Out
@@ -205,10 +237,18 @@ export default function Navbar() {
                                 </>
                             ) : (
                                 <div className="flex flex-col gap-2 mt-2">
-                                    <Link href="/login" className="text-center text-gray-600 font-medium px-4 py-3 rounded-lg hover:bg-gray-50">
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="text-center text-gray-600 font-medium px-4 py-3 rounded-lg hover:bg-gray-50"
+                                    >
                                         Log In
                                     </Link>
-                                    <Link href="/signup" className="btn-primary text-center justify-center">
+                                    <Link
+                                        href="/signup"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="btn-primary text-center justify-center"
+                                    >
                                         Get Started
                                     </Link>
                                 </div>
