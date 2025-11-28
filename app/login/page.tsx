@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-export default function LoginPage() {
+export default function LoginPageContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -22,13 +22,11 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            // Attempt sign in directly
             await signIn(email, password);
             toast.success('Logged in successfully!');
             router.push(redirect);
         } catch (error: any) {
             console.error('Login error:', error);
-            // Handle specific firebase errors
             if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 toast.error('Incorrect email or password.');
             } else if (error.code === 'auth/user-not-found') {
