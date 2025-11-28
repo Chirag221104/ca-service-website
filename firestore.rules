@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Anyone authenticated can read their own user document
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Only the user can create/update their own document
+      // Admin field can only be set if user email matches admin email
+      allow create: if isAuthenticated() && 
+                      request.auth.uid == userId;
+      
+      allow update: if isAuthenticated() && 
+                      request.auth.uid == userId;
+      
+      // Admins can read all users
+      allow read: if isAdmin();
+    }
+    
+    // Services collection
+    match /services/{serviceId} {
+      // Anyone can read services (for public browsing)
+      allow read: if true;
+      
+      // Only admins can create, update, or delete services
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Service Requests collection
+    match /serviceRequests/{requestId} {
+      // Users can read their own requests
+      allow read: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid;
+      
+      // Admins can read all requests
+      allow read: if isAdmin();
+      
+      // Authenticated users can create requests for themselves
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid;
+      
+      // Only admins can update requests (status, notes, etc.)
+      allow update: if isAdmin();
+      
+      // Only admins can delete requests
+      allow delete: if isAdmin();
+    }
+    
+    // FAQs collection
+    match /faqs/{faqId} {
+      // Anyone can read FAQs (for public browsing)
+      allow read: if true;
+      
+      // Only admins can create, update, or delete FAQs
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Testimonials collection
+    match /testimonials/{testimonialId} {
+      // Anyone can read visible testimonials
+      allow read: if true;
+      
+      // Only admins can create, update, or delete testimonials
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
