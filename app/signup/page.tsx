@@ -16,19 +16,31 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [signupAttempted, setSignupAttempted] = useState(false);
     const { signUp, signInWithGoogle } = useAuth();
     const router = useRouter();
 
+    const passwordCriteria = {
+        length: { label: 'At least 6 characters', valid: password.length >= 6 },
+        uppercase: { label: 'At least one uppercase character', valid: /[A-Z]/.test(password) },
+        lowercase: { label: 'At least one lowercase character', valid: /[a-z]/.test(password) },
+        number: { label: 'At least one numeric character', valid: /[0-9]/.test(password) },
+        special: { label: 'At least one special character (!@#$% etc.)', valid: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
+    };
+
+    const isPasswordValid = Object.values(passwordCriteria).every(c => c.valid);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSignupAttempted(true);
 
-        if (password !== confirmPassword) {
-            toast.error('Passwords do not match');
+        if (!isPasswordValid) {
+            toast.error('Password does not meet all requirements.');
             return;
         }
 
-        if (password.length < 6) {
-            toast.error('Password must be at least 6 characters');
+        if (password !== confirmPassword) {
+            toast.error('Passwords do not match');
             return;
         }
 
@@ -120,10 +132,13 @@ export default function SignupPage() {
                                     type={showPassword ? 'text' : 'password'}
                                     required
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        // Reset signup attempt state on change to clear red errors
+                                        if (signupAttempted) setSignupAttempted(false);
+                                    }}
                                     className="input-field pr-10"
                                     placeholder="••••••••"
-                                    minLength={6}
                                 />
                                 <button
                                     type="button"
@@ -141,6 +156,45 @@ export default function SignupPage() {
                                         </svg>
                                     )}
                                 </button>
+                            </div>
+
+                            {/* Password Validation Rules */}
+                            <div className="mt-3 space-y-2">
+                                {Object.entries(passwordCriteria).map(([key, { label, valid }]) => (
+                                    <div key={key} className="flex items-center gap-2 text-sm transition-colors duration-200">
+                                        <div className={`
+                                            w-4 h-4 rounded-full flex items-center justify-center border
+                                            ${valid
+                                                ? 'bg-green-100 border-green-500 text-green-600'
+                                                : signupAttempted
+                                                    ? 'bg-red-100 border-red-500 text-red-600'
+                                                    : 'bg-yellow-50 border-yellow-500 text-yellow-600'
+                                            }
+                                        `}>
+                                            {valid ? (
+                                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            ) : signupAttempted ? (
+                                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            ) : (
+                                                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                                            )}
+                                        </div>
+                                        <span className={`
+                                            ${valid
+                                                ? 'text-green-700'
+                                                : signupAttempted
+                                                    ? 'text-red-700 font-medium'
+                                                    : 'text-gray-600'
+                                            }
+                                        `}>
+                                            {label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
