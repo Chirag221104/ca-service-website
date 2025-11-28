@@ -1,5 +1,3 @@
 {
-  "build": {
-    "exclude": ["functions/**"]
-  }
+  "ignoreCommand": "echo 'Skipping firebase functions folder' && exit 0"
 }
