@@ -1,3 +1,0 @@
-{
-  "ignoreCommand": "echo 'Always build' && exit 1"
-}
